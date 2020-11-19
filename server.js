@@ -6,6 +6,7 @@ const dotEnv = require('dotenv');
 const typeDefs = require('./typeDefs')
 const resolvers = require('./resolvers')
 const { connection } = require('./database/util')
+const { verifyUser } = require('./helper/context')
 
 
 //set env variables
@@ -24,7 +25,12 @@ app.use(express.json());
 
 const apolloServer = new ApolloServer({
     typeDefs,
-    resolvers
+    resolvers,
+    context: async ({ req }) => {
+        await verifyUser(req)
+
+        return { email: req.email }
+    }
 })
 
 apolloServer.applyMiddleware({app,path:'/graphql'})

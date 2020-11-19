@@ -1,8 +1,10 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const { combineResolvers } = require('graphql-resolvers')
 
 const {users,tasks } = require('../constants')
 const User = require('../database/models/user')
+const { isAuthenticated }  = require('./middleware')
 
 
 module.exports = {
@@ -11,10 +13,9 @@ module.exports = {
         
             return users
         },
-        user: (_, { id }) => {
-        
+        user: combineResolvers(isAuthenticated , (_, { id },{ email }) => {
             return users.find(user => user.id === id )
-        } 
+        })
     },
     Mutation:{
         signup: async (_, { input }) => {
