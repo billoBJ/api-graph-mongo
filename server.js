@@ -33,7 +33,7 @@ const PORT = process.env.PORT || 3000;
 
 
 app.use('/',(req,res,next)=> {
-    res.send({message: 'Hola das'})
+    res.send({message: 'Hola msj'})
 })
 
 app.listen(PORT,() => {
