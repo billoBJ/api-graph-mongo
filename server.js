@@ -2,12 +2,13 @@ const express = require('express');
 const { ApolloServer, gql } = require('apollo-server-express');
 const cors = require('cors');
 const dotEnv = require('dotenv');
+const DataLoader = require('dataloader')
 
 const typeDefs = require('./typeDefs')
 const resolvers = require('./resolvers')
 const { connection } = require('./database/util')
 const { verifyUser } = require('./helper/context')
-
+const loaders = require('./loaders')
 
 //set env variables
 dotEnv.config();
@@ -23,6 +24,8 @@ app.use(cors());
 //body parser middleware
 app.use(express.json());
 
+const userLoader = new DataLoader(keys => loaders.user.batchUsers(keys) ) 
+
 const apolloServer = new ApolloServer({
     typeDefs,
     resolvers,
@@ -31,7 +34,10 @@ const apolloServer = new ApolloServer({
 
         return { 
             email: req.email,
-            loggedInUserId: req.loggedInUserId
+            loggedInUserId: req.loggedInUserId,
+            loaders:{
+                user: userLoader
+            }
         }
     }
 })
