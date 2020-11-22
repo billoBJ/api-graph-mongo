@@ -2,8 +2,18 @@ const {  gql } = require('apollo-server-express');
 
 module.exports = gql`
     extend type Query{
-        tasks: [Task!],
+        tasks(cursor: String , limit: Int): TaskFeed!,
         task(id: ID!): Task,
+    }
+
+    type TaskFeed{
+        taskFeed: [Task!],
+        pageInfo: PageInfo!
+    }
+
+    type PageInfo{
+        nextPageInfo: String
+        hasNextPage: Boolean
     }
 
     input createTaskInput{

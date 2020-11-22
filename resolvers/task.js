@@ -1,19 +1,36 @@
 const uuid =  require('uuid')
 const { combineResolvers } = require('graphql-resolvers')
 
-const {users,tasks } = require('../constants')
 const Task = require('../database/models/task')
 const User = require('../database/models/user')
 const { isAuthenticated,isTaskOwner }  = require('./middleware')
+const { base64ToString, stringToBase64 } = require('../helper')
 
 
 module.exports = {
     Query:{
-        tasks:combineResolvers(isAuthenticated, async (_,__, { loggedInUserId }) => {
+        tasks:combineResolvers(isAuthenticated, async (_,{ cursor , limit = 10 }, { loggedInUserId }) => {
             try{
-                const tasks = await Task.find({ user: loggedInUserId })
+                const query = { user: loggedInUserId }
 
-                return tasks
+                if(cursor){
+                    query['_id'] = {
+                        '$lt': base64ToString(cursor)
+                    }
+                }
+
+                let tasks = await Task.find(query).sort({_id: -1 }).limit(limit + 1 )
+                const hasNextPage = tasks.length > limit
+
+                tasks = hasNextPage ? tasks.slice(0, -1) : tasks
+
+                return {
+                    taskFeed: tasks,
+                    pageInfo:{ 
+                        nextPageInfo: hasNextPage ? stringToBase64(tasks[tasks.length - 1].id) : null,
+                        hasNextPage
+                    }
+                }
             }catch(error){
                 throw error
             }

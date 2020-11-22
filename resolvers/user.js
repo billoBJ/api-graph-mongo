@@ -2,7 +2,6 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { combineResolvers } = require('graphql-resolvers')
 
-const {users,tasks } = require('../constants')
 const User = require('../database/models/user')
 const Task = require('../database/models/task')
 const { isAuthenticated }  = require('./middleware')
