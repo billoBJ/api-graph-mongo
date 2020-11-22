@@ -24,21 +24,24 @@ app.use(cors());
 //body parser middleware
 app.use(express.json());
 
-const userLoader = new DataLoader(keys => loaders.user.batchUsers(keys) ) 
+//const userLoader = new DataLoader(keys => loaders.user.batchUsers(keys) ) 
 
 const apolloServer = new ApolloServer({
     typeDefs,
     resolvers,
-    context: async ({ req }) => {
-        await verifyUser(req)
-
-        return { 
-            email: req.email,
-            loggedInUserId: req.loggedInUserId,
-            loaders:{
-                user: userLoader
-            }
+    context: async ({ req, connection }) => {
+        const contextObj = {}
+        
+        if(req){
+            await verifyUser(req)
+            contextObj.email = req.email,
+            contextObj.loggedInUserId = req.loggedInUserId
         }
+        contextObj.loaders = {
+            user: new DataLoader(keys => loaders.user.batchUsers(keys) ) 
+        }
+
+        return contextObj
     }
 })
 
@@ -48,10 +51,12 @@ const PORT = process.env.PORT || 3000;
 
 
 app.use('/',(req,res,next)=> {
-    res.send({message: 'Hola msj'})
+    //res.send({message: 'Hola msj'})
 })
 
-app.listen(PORT,() => {
+const httpServer = app.listen(PORT,() => {
     console.log(`server listening en port: ${PORT}`)
     console.log(`GraphQl Endpoint: ${apolloServer.graphqlPath}`)
 })
+
+apolloServer.installSubscriptionHandlers(httpServer)

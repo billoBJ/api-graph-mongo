@@ -14,6 +14,9 @@ const typeDefs = gql`
         _: String
     }
 
+    type Subscription{
+        _: String
+    }
 `;
 
 module.exports=[

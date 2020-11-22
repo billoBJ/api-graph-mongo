@@ -34,6 +34,10 @@ module.exports = gql`
         updatedAt: Date!,
     }
 
+    extend type Subscription{
+        userCreated: User
+    }
+
 `;
 
 // modificador "!" indica que el campo no puede ser null
