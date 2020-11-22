@@ -42,6 +42,12 @@ const apolloServer = new ApolloServer({
         }
 
         return contextObj
+    },
+    formatError: (error) => {
+
+        return {
+            message: error.message
+        }
     }
 })
 
